@@ -1,5 +1,5 @@
 {
-  "name": "minecraft-telegram-webhook-bot",
+  "name": "minecraft-telegram-bot-1165",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
@@ -7,10 +7,7 @@
   },
   "dependencies": {
     "express": "^4.18.2",
-    "mineflayer": "^4.5.0",
-    "mineflayer-pathfinder": "^2.3.1",
-    "vec3": "^0.1.7",
-    "node-telegram-bot-api": "^0.61.0",
-    "body-parser": "^1.20.2"
+    "mineflayer": "3.11.2",
+    "node-telegram-bot-api": "^0.61.0"
   }
 }
