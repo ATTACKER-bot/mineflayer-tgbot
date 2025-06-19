@@ -16,7 +16,7 @@ const options = {
   host: 'hypixel.uz',
   port: 25565,
   username: 'AT_TG',
- version: '1.20.1'
+ version: '1.20.4'
 };
 
 let bot;
