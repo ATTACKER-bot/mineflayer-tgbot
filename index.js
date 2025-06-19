@@ -82,7 +82,7 @@ function createBot() {
   bot.on('error', err => console.log('[ERROR]', err.message));
   bot.on('end', () => {
     console.log('[BOT] Uzildi. 5 soniyadan so‘ng qayta ulanadi...');
-    setTimeout(createBot, 5000);
+    setTimeout(createBot, 30000);
   });
 }
 
