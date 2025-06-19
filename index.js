@@ -2,11 +2,15 @@ const mineflayer = require('mineflayer');
 const { pathfinder, Movements } = require('mineflayer-pathfinder');
 const { Vec3 } = require('vec3');
 const express = require('express');
+const bodyParser = require('body-parser');
 const telegram = require('./telegram');
 
 const app = express();
+app.use(bodyParser.json());
+app.use('/telegram-webhook', telegram.webhookHandler);
+
 app.get('/', (req, res) => res.send('✅ Bot tirik!'));
-app.listen(3000, () => console.log('🌐 Web server ishga tushdi (port 3000)'));
+app.listen(3000, () => console.log('🌐 Web server port 3000 da ishlayapti'));
 
 const options = {
   host: 'hypixel.uz',
@@ -35,8 +39,7 @@ function createBot() {
 
     setInterval(() => {
       const nearest = Object.values(bot.entities).find(e =>
-        e.type === 'mob' &&
-        !['villager', 'iron_golem', 'cat', 'wolf', 'sheep', 'cow', 'horse'].includes(e.name)
+        e.type === 'mob' && !['villager', 'iron_golem', 'cat', 'wolf', 'sheep', 'cow', 'horse'].includes(e.name)
       );
       if (nearest && bot.entity) {
         bot.lookAt(nearest.position.offset(0, 1.6, 0), true, () => bot.attack(nearest));
@@ -63,7 +66,7 @@ function createBot() {
     }
   });
 
-  telegram.onCommand((username, text) => {
+  telegram.setCommandCallback((username, text) => {
     const hasOffensive = offensiveWords.some(word => word.test(text));
     if (username !== allowedUsername || hasOffensive) return;
 
