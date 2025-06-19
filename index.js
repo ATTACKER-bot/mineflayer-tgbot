@@ -15,7 +15,7 @@ app.listen(3000, () => console.log('🌐 Web server port 3000 da ishlayapti'));
 const options = {
   host: 'hypixel.uz',
   port: 25565,
-  username: 'rotaAKXMADOV',
+  username: 'AT_TG',
   version: false
 };
 
@@ -34,8 +34,8 @@ function createBot() {
     const defaultMove = new Movements(bot);
     bot.pathfinder.setMovements(defaultMove);
 
-    bot.chat('/register werifyC12 werifyC12');
-    bot.chat('/login werifyC12');
+    bot.chat('/register ooaooaoo ooaooaoo');
+    bot.chat('/login ooaooaoo');
 
     setInterval(() => {
       const nearest = Object.values(bot.entities).find(e =>
