@@ -1,89 +1,94 @@
-const mineflayer = require('mineflayer');
-const { pathfinder, Movements } = require('mineflayer-pathfinder');
-const { Vec3 } = require('vec3');
 const express = require('express');
-const bodyParser = require('body-parser');
-const telegram = require('./telegram');
+const mineflayer = require('mineflayer');
 
 const app = express();
-app.use(bodyParser.json());
-app.use('/telegram-webhook', telegram.webhookHandler);
+let bot;
 
-app.get('/', (req, res) => res.send('✅ Bot tirik!'));
-app.listen(3000, () => console.log('🌐 Web server port 3000 da ishlayapti'));
-
-const options = {
+const config = {
   host: 'hypixel.uz',
-  port: 25565,
-  username: 'AT_TG',
- version: '1.20.4'
+  port: 25566,
+  version: '1.12',
+  username: 'Amirxon',
+  password: 'abdu2006',
+  loginPassword: '55a55a55', // agar login komandasi boshqa parol bilan bo‘lsa
+  controller: 'ATTACKER'
 };
 
-let bot;
-let lastResponseTime = 0;
-const RESPONSE_COOLDOWN = 15 * 60 * 1000;
-const allowedUsername = "shokxpm";
-const offensiveWords = [/fuck/i, /suka/i, /bitch/i, /xotin/i, /jins/i, /sex/i, /21\+/i, /18\+/i];
+function startBot() {
+  bot = mineflayer.createBot({
+    host: config.host,
+    port: config.port,
+    version: config.version,
+    username: config.username
+  });
 
-function createBot() {
-  bot = mineflayer.createBot(options);
-  bot.loadPlugin(pathfinder);
-
-  bot.once('spawn', () => {
-    console.log('[BOT] Ulandi.');
-    const defaultMove = new Movements(bot);
-    bot.pathfinder.setMovements(defaultMove);
-
-    bot.chat('/register ooaooaoo ooaooaoo');
-    bot.chat('/login ooaooaoo');
-
-    setInterval(() => {
-      const nearest = Object.values(bot.entities).find(e =>
-        e.type === 'mob' && !['villager', 'iron_golem', 'cat', 'wolf', 'sheep', 'cow', 'horse'].includes(e.name)
-      );
-      if (nearest && bot.entity) {
-        bot.lookAt(nearest.position.offset(0, 1.6, 0), true, () => bot.attack(nearest));
-      }
-    }, 500);
-
-    setInterval(() => {
-      bot.setControlState('jump', true);
-      setTimeout(() => bot.setControlState('jump', false), 500);
-    }, 7000);
+  bot.on('messagestr', (message) => {
+    console.log(message);
+    if (message.includes('/register')) {
+      bot.chat(`/register ${config.password} ${config.password}`);
+    }
+    if (message.includes('/login')) {
+      bot.chat(`/login ${config.loginPassword}`);
+    }
   });
 
   bot.on('chat', (username, message) => {
-    if (username === bot.username) return;
-
-    telegram.sendToTelegram(`<${username}> ${message}`);
-
-    if (message.toLowerCase().includes(bot.username.toLowerCase())) {
-      const now = Date.now();
-      if (now - lastResponseTime > RESPONSE_COOLDOWN) {
-        bot.chat('Agar men bilan aloqaga chiqmoqchi bo‘lsangiz Telegram: @shokxpm yoki Instagram: @shokxpubg');
-        lastResponseTime = now;
+    if (username === config.controller) {
+      if (message.startsWith('- ')) {
+        const toSay = message.replace('- ', '');
+        bot.chat(toSay);
+      } else if (message === 'tpam') {
+        bot.chat(`/tpa ${config.controller}`);
       }
     }
   });
 
-  telegram.setCommandCallback((username, text) => {
-    const hasOffensive = offensiveWords.some(word => word.test(text));
-    if (username !== allowedUsername || hasOffensive) return;
-
-    if (text === 'tprota') {
-      bot.chat('/tpa AKXMADOV');
-    } else if (text === 'tphrota') {
-      bot.chat('/tphere AKXMADOV');
-    } else {
-      bot.chat(text);
-    }
+  bot.on('physicTick', () => {
+    const playerEntity = bot.nearestEntity(entity => entity.type === 'player');
+    if (!playerEntity) return;
+    const pos = playerEntity.position.offset(0, playerEntity.height, 0);
+    bot.lookAt(pos);
   });
 
-  bot.on('error', err => console.log('[ERROR]', err.message));
+  bot.on('death', () => {
+    bot.chat('/back');
+    bot.chat(`/w ${config.controller} Amirxon uldi`);
+  });
+
+  bot.on('spawn', () => {
+    console.log('✅ Bot spawn bo‘ldi!');
+    // har 5 sekundda sakrash
+    setInterval(() => {
+      bot.setControlState('jump', true);
+      setTimeout(() => {
+        bot.setControlState('jump', false);
+      }, 500);
+    }, 5000);
+
+    // /is warp farm komandasi
+    setTimeout(() => {
+      bot.chat('/is warp farm');
+      console.log('/is warp farm komandasi yuborildi');
+    }, 5000);
+  });
+
   bot.on('end', () => {
-    console.log('[BOT] Uzildi. 5 soniyadan so‘ng qayta ulanadi...');
-    setTimeout(createBot, 30000);
+    console.log('⚠️ Bot serverdan chiqdi. Qayta ulanmoqda...');
+    setTimeout(startBot, 5000);
+  });
+
+  bot.on('error', err => {
+    console.log('❌ Bot xatolik berdi:', err.message);
   });
 }
 
-createBot();
+// Botni ishga tushiramiz
+startBot();
+
+// UptimeRobot uchun web server
+app.get('/', (req, res) => {
+  res.send('✅ Bot ishlayapti!');
+});
+app.listen(3000, () => {
+  console.log('🌐 Web server ishga tushdi (port 3000)');
+});
